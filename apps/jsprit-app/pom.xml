@@ -36,7 +36,6 @@
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
 		</dependency>
-
 		<dependency>
 			<groupId>com.graphhopper</groupId>
 			<artifactId>jsprit-core</artifactId>
