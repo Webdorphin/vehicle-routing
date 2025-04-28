@@ -1,0 +1,9 @@
+version: "3.8"
+
+services:
+  graphhopper:
+    build: ./graphhopper
+    container_name: graphhopper-server
+    ports:
+      - "8989:8989"
+    restart: unless-stopped

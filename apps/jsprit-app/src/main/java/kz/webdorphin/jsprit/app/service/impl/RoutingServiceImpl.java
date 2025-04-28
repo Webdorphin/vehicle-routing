@@ -24,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
 public class RoutingServiceImpl implements RoutingService {
     private static final String VRP_VEHICLE_TYPE = "courier-type";
     private static final String VRP_VEHICLE_NAME = "courier-1";
