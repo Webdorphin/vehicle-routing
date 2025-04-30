@@ -17,12 +17,7 @@ public class RoutingCostServiceImpl implements RoutingCostService {
 
     @Override
     public RouteCostMatrixDto getRouteCostMatrix(List<GeoPoint> deliveryPoints) {
-
-        // delivery points sum + 1 warehouse (starting point).
-//        int matrixSize = deliveryPoints.size() + 1;
-
         int matrixSize = deliveryPoints.size();
-
         double[][] costMatrix = new double[matrixSize][matrixSize];
 
         for (int i = 0; i < matrixSize; i++) {
