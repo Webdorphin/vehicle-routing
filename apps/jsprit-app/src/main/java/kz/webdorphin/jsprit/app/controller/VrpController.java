@@ -2,21 +2,22 @@ package kz.webdorphin.jsprit.app.controller;
 
 import kz.webdorphin.jsprit.app.data.request.RouteRequest;
 import kz.webdorphin.jsprit.app.data.response.RouteResponse;
-import kz.webdorphin.jsprit.app.service.RoutingService;
+import kz.webdorphin.jsprit.app.service.RoutingVrpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/routing")
+@RequestMapping("/api/v1/vehicle-routing")
 @RequiredArgsConstructor
 public class VrpController {
-    private final RoutingService routingService;
+    private final RoutingVrpService routingVrpService;
 
-    @GetMapping("/vrp")
+    @PostMapping
     public RouteResponse solveVrp(@RequestBody RouteRequest request) {
-        return routingService.solveVRP(request);
+        return routingVrpService.solveVRP(request);
     }
 }

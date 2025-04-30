@@ -6,3 +6,6 @@ grpc:
   server:
     port: 9090
 
+integration:
+  graphhopper:
+    base-url: http://localhost:8989
