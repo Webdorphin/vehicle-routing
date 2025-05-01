@@ -17,21 +17,29 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import kz.webdorphin.jsprit.app.data.GeoPoint;
+import kz.webdorphin.jsprit.app.data.RouteCostMatrixDto;
 import kz.webdorphin.jsprit.app.data.request.RouteRequest;
 import kz.webdorphin.jsprit.app.data.response.RouteResponse;
-import kz.webdorphin.jsprit.app.service.RoutingService;
+import kz.webdorphin.jsprit.app.service.RoutingCostService;
+import kz.webdorphin.jsprit.app.service.RoutingVrpService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RoutingServiceImpl implements RoutingService {
+@RequiredArgsConstructor
+public class RoutingVrpServiceImpl implements RoutingVrpService {
     private static final String VRP_VEHICLE_TYPE = "courier-type";
     private static final String VRP_VEHICLE_NAME = "courier-1";
+
+    private final RoutingCostService routingCostService;
 
     @Override
     public RouteResponse solveVRP(RouteRequest payload) {
         // 1. Build cost matrix
-        VehicleRoutingTransportCostsMatrix.Builder costBuilder = buildCostMatrix(payload);
+        var points = payload.getPoints();
+        RouteCostMatrixDto matrixDto = routingCostService.getRouteCostMatrix(points);
+
+        VehicleRoutingTransportCostsMatrix.Builder costBuilder = getCostBuilder(points, matrixDto);
 
         // 2. Build VRP Problem
         VehicleRoutingProblem problem = getVehicleRoutingProblem(payload, costBuilder);
@@ -58,24 +66,21 @@ public class RoutingServiceImpl implements RoutingService {
             .build();
     }
 
-    private VehicleRoutingTransportCostsMatrix.Builder buildCostMatrix(RouteRequest payload) {
+    private VehicleRoutingTransportCostsMatrix.Builder getCostBuilder(List<GeoPoint> points, RouteCostMatrixDto matrixDto) {
         VehicleRoutingTransportCostsMatrix.Builder costBuilder =
             VehicleRoutingTransportCostsMatrix.Builder.newInstance(false);
 
-        List<String> pointIds = new ArrayList<>();
-        for (GeoPoint point : payload.getPoints()) {
-            pointIds.add(point.getId());
-        }
-
-        for (int i = 0; i < pointIds.size(); i++) {
-            for (int j = 0; j < pointIds.size(); j++) {
+        for (int i = 0; i < points.size(); i++) {
+            for (int j = 0; j < points.size(); j++) {
                 if (i != j) {
-                    costBuilder.addTransportDistance(pointIds.get(i), pointIds.get(j), payload.getDistances()[i][j]);
-                    costBuilder.addTransportTime(pointIds.get(i), pointIds.get(j), payload.getTimes()[i][j]);
+                    String fromId = points.get(i).getId();
+                    String toId = points.get(j).getId();
+                    double[][] distanceMatrix = matrixDto.getMatrix();
+                    costBuilder.addTransportDistance(fromId, toId, distanceMatrix[i][j]);
+                    costBuilder.addTransportTime(fromId, toId, distanceMatrix[i][j]); // fyi: same as distance
                 }
             }
         }
-
         return costBuilder;
     }
 
@@ -87,13 +92,13 @@ public class RoutingServiceImpl implements RoutingService {
             .build();
 
         // Assume first point is warehouse
-        GeoPoint warehouse = payload.getPoints().get(0);
+        GeoPoint warehouse = payload.getPoints().getFirst();
         List<GeoPoint> deliveryPoints = payload.getPoints().stream()
             .skip(1)
             .toList();
 
         VehicleImpl vehicle = VehicleImpl.Builder.newInstance(VRP_VEHICLE_NAME)
-            .setStartLocation(Location.newInstance(warehouse.getLon(), warehouse.getLat()))
+            .setStartLocation(Location.newInstance(warehouse.getId()))
             .setType(type)
             .build();
 
@@ -115,7 +120,7 @@ public class RoutingServiceImpl implements RoutingService {
     private com.graphhopper.jsprit.core.problem.job.Service buildDeliveryJob(GeoPoint point) {
         return com.graphhopper.jsprit.core.problem.job.Service.Builder
             .newInstance(point.getId())
-            .setLocation(Location.newInstance(point.getLat(), point.getLon()))
+            .setLocation(Location.newInstance(point.getId()))
             .build();
     }
 }

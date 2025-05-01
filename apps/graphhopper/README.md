@@ -13,3 +13,6 @@ https://github.com/graphhopper/graphhopper/releases/download/10.2/graphhopper-we
 ```
 java -Ddw.graphhopper.datareader.file=data/kazakhstan-latest.osm.pbf -jar *.jar server config-example.yml
 ```
+
+### Manual start up
+java -Ddw.graphhopper.datareader.file=kazakhstan-latest.osm.pbf -jar graphhopper-web-10.2.jar server config-example.yml
