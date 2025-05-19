@@ -7,5 +7,6 @@ import lombok.Data;
 @AllArgsConstructor
 public class RouteCostMatrixDto {
 
+    private Double totalDistance;
     private double[][] matrix;
 }

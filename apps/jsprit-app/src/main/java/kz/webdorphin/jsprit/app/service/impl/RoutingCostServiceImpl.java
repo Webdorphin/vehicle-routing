@@ -19,6 +19,7 @@ public class RoutingCostServiceImpl implements RoutingCostService {
     public RouteCostMatrixDto getRouteCostMatrix(List<GeoPoint> deliveryPoints) {
         int matrixSize = deliveryPoints.size();
         double[][] costMatrix = new double[matrixSize][matrixSize];
+        double totalDistance = 0;
 
         for (int i = 0; i < matrixSize; i++) {
             for (int j = 0; j < matrixSize; j++) {
@@ -32,9 +33,10 @@ public class RoutingCostServiceImpl implements RoutingCostService {
 
                 GraphHopperRouteResponse route = graphHopperService.getRoute(from, to);
                 costMatrix[i][j] = route.getDistanceMeters();
+                totalDistance += route.getDistanceMeters();
             }
         }
 
-        return new RouteCostMatrixDto(costMatrix);
+        return new RouteCostMatrixDto(totalDistance, costMatrix);
     }
 }
